@@ -1,0 +1,68 @@
+{
+    "model_type": "GaussianMixture",
+    "n_components": 5,
+    "covariance_type": "full",
+    "random_state": 42,
+    "features": [
+        "packet_loss_pct",
+        "latency_ms",
+        "jitter_ms",
+        "packet_drop_count",
+        "throughput_kbps",
+        "delay_variation_ms"
+    ],
+    "normal_percentile": 95.0,
+    "anomalous_percentile": 99.0,
+    "threshold_normal": -3.8321,
+    "threshold_anomalous": 0.0856,
+    "baseline_score_mean": -7.6135,
+    "baseline_score_std": 2.159,
+    "bic_scores": {
+        "1": -38230.71,
+        "2": -131428.77,
+        "3": -131356.68,
+        "4": -135424.85,
+        "5": -138744.39
+    },
+    "aic_scores": {
+        "1": -38423.13,
+        "2": -131820.72,
+        "3": -131948.17,
+        "4": -136215.88,
+        "5": -139734.96
+    },
+    "component_weights": [
+        0.4055,
+        0.0257,
+        0.2692,
+        0.0302,
+        0.2693
+    ],
+    "training_samples_baseline": 9195,
+    "total_dataset_samples": 10000,
+    "evaluation_metrics": {
+        "accuracy": 0.9908,
+        "precision": 0.8974,
+        "recall": 1.0,
+        "f1_score": 0.9459,
+        "specificity": 0.99,
+        "roc_auc": 1.0,
+        "pr_auc": 1.0
+    },
+    "confusion_matrix": {
+        "true_negatives": 9103,
+        "false_positives": 92,
+        "false_negatives": 0,
+        "true_positives": 805,
+        "matrix": [
+            [
+                9103,
+                92
+            ],
+            [
+                0,
+                805
+            ]
+        ]
+    }
+}

@@ -1,0 +1,11 @@
+Metric,GMM (Primary),Isolation Forest (Baseline)
+Accuracy,99.08%,96.48%
+Precision,89.74%,85.56%
+Recall,100.00%,67.70%
+F1-Score,0.9459,0.7559
+ROC-AUC,1.0000,0.9908
+PR-AUC,1.0000,0.8864
+True Positives (TP),805,545
+False Positives (FP),92,92
+False Negatives (FN),0,260
+True Negatives (TN),9103,9103
