@@ -39,39 +39,103 @@ Traditional monitoring relies on simplistic, static thresholds (e.g. `latency > 
 - **Environment:** 100% offline reproducible execution with zero external cloud dependencies.
 
 ---
+## System Architecture
 
-## 4. System Architecture
+The system follows a complete pipeline from user-provided VoIP telemetry to anomaly classification and dashboard visualization.
 
-```mermaid
-graph TD
-    A[Uploaded VoIP Telemetry CSV<br/>User-provided data only] --> B[VoIPPreprocessor<br/>src/preprocessing.py]
-    B -->|Cleaning, Imputation, Bound Enforcement| C[Feature Matrix X<br/>6 Dimensional QoS Vector]
-    C -->|StandardScaler Normalization| D[Standardized Features X_scaled]
+```text
+                    +---------------------------+
+                    |   VoIP Telemetry CSV      |
+                    |      User Upload           |
+                    +-------------+-------------+
+                                  |
+                                  v
+                    +---------------------------+
+                    |     Data Preprocessing     |
+                    |                           |
+                    | - Data Validation         |
+                    | - Missing Value Handling  |
+                    | - Bound Enforcement       |
+                    +-------------+-------------+
+                                  |
+                                  v
+                    +---------------------------+
+                    |     Feature Matrix X      |
+                    |                           |
+                    |  6 QoS Network Features  |
+                    +-------------+-------------+
+                                  |
+                                  v
+                    +---------------------------+
+                    |    StandardScaler         |
+                    |    Feature Normalization  |
+                    +-------------+-------------+
+                                  |
+                    +-------------+-------------+
+                    |                           |
+                    v                           v
+        +---------------------+       +----------------------+
+        |  GMM Model Training |       | Isolation Forest     |
+        |                     |       | Baseline             |
+        | K = 1,2,3,4,5       |       +----------------------+
+        | BIC / AIC Analysis  |
+        +----------+----------+
+                   |
+                   v
+        +---------------------------+
+        |   Trained GMM Model       |
+        |   K = 5 Components        |
+        +-------------+-------------+
+                      |
+                      v
+        +---------------------------+
+        | GaussianMixture           |
+        | score_samples()           |
+        +-------------+-------------+
+                      |
+                      v
+        +---------------------------+
+        | Negative Log-Likelihood   |
+        |                           |
+        | S(x) = -ln p(x)           |
+        +-------------+-------------+
+                      |
+                      v
+        +---------------------------+
+        |   Threshold Analysis      |
+        |                           |
+        | 95th Percentile           |
+        | 99th Percentile           |
+        +-------------+-------------+
+                      |
+                      v
+              +-------+-------+
+              |               |
+              v               v
+        +----------+    +------------+
+        |  NORMAL  |    | SUSPICIOUS |
+        +----------+    +------------+
+              \               /
+               \             /
+                \           /
+                 v         v
+              +----------------+
+              |   ANOMALOUS    |
+              +-------+--------+
+                      |
+                      v
+        +---------------------------+
+        |   Streamlit Dashboard     |
+        |                           |
+        | - Data Explorer           |
+        | - Anomaly Analysis        |
+        | - Live Monitoring         |
+        | - Threshold Analysis      |
+        | - GMM Diagnostics         |
+        | - Model Evaluation        |
+        +---------------------------+
     
-    subgraph Offline Model Selection & Training
-        D --> E[Hyperparameter Optimization<br/>K in {1, 2, 3, 4, 5}]
-        E -->|Calculate BIC & AIC| F[Component Selection: K=5<br/>Lowest BIC = -138,744.39]
-        F --> G[Fitted GMM Artifact<br/>models/gmm_model.pkl]
-        F --> H[Secondary Baseline<br/>models/isolation_forest.pkl]
-    end
-    
-    subgraph Online Anomaly Scoring Pipeline
-        D --> I[Likelihood Density Evaluator<br/>GaussianMixture.score_samples]
-        G -.-> I
-        I -->|ln p(x)| J[Negative Log-Likelihood<br/>Anomaly Score S(x) = -ln p(x)]
-        J --> K[Dual-Threshold Calibration<br/>tau_95: Suspicious | tau_99: Critical]
-        K --> L{Decision Classifier}
-        L -->|S(x) <= tau_95| M[NORMAL Quality]
-        L -->|tau_95 < S(x) <= tau_99| N[SUSPICIOUS Condition]
-        L -->|S(x) > tau_99| O[ANOMALOUS Incident Alert]
-    end
-    
-    subgraph User Presentation Layer
-        M & N & O --> P[Interactive Streamlit Dashboard<br/>app.py]
-        P --> Q[Live Telemetry Streaming]
-        P --> R[Dynamic Threshold Tuning]
-        P --> S[Model Diagnostics & Viva Guide]
-    end
+   
 ```
 
 ---
